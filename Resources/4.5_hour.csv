@@ -1,2 +1,0 @@
-time,latitude,longitude,depth,mag,magType,nst,gap,dmin,rms,net,id,updated,place,type,horizontalError,depthError,magError,magNst,status,locationSource,magSource
-2020-01-02T03:35:22.971Z,12.5692,-88.1976,59.99,4.6,mb,,133,1.155,1.27,us,us70006tej,2020-01-02T04:00:04.040Z,"71km SSW of Intipuca, El Salvador",earthquake,7.2,7.7,0.037,223,reviewed,us,us
