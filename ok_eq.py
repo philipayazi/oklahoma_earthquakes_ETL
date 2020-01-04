@@ -1,18 +1,12 @@
-from datetime import datetime, timedelta
-from threading import Timer
-
-x = datetime.today()
-y = x.replace(day=x.day, hour=23, minute=59, second=59, microsecond=0) + timedelta(days=1)
-delta_t = y - x
-
-secs = delta_t.total_seconds()
-
+import schedule
+import time
+import pandas as pd
+import pymongo
+from bs4 import BeautifulSoup as bs
+from splinter import Browser
+import os
 
 def eq_collection():
-    import pandas as pd
-    import pymongo
-    from bs4 import BeautifulSoup as bs
-    from splinter import Browser
 
     print('code running!')
 
@@ -23,10 +17,11 @@ def eq_collection():
 
     browser.links.find_by_partial_text('All')[1].click()
 
+    time.sleep(5)
+
     # read csv_file to pandas dataframe
     eq_file = "../Downloads/all_day.csv"
     eq_df = pd.read_csv(eq_file)
-    eq_df.head()
 
     # select columns of interest
     new_eq_df = eq_df[['time', 'latitude', 'longitude', 'depth', 'mag', 'magType', 'place']].copy()
@@ -53,12 +48,16 @@ def eq_collection():
     # insert rows of the data frame as a dictionary to the database with column names as the key
     db.earthquakes.insert_many(new_eq_df.to_dict('records'))
 
+    time.sleep(5)
 
-t = Timer(secs, eq_collection)
-t.start()
+    if os.path.exists("all_day.csv"):
+        os.remove("all_day.csv")
+    else:
+        print("The file does not exist")
 
+schedule.every().day.at("10:13").do(eq_collection)
 
-    import pandas as pd
-    import pymongo
-    from bs4 import BeautifulSoup as bs
-    from splinter import Browser
+while True:
+    schedule.run_pending()
+    time.sleep(60)
+
