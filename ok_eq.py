@@ -5,6 +5,8 @@ import pymongo
 from bs4 import BeautifulSoup as bs
 from splinter import Browser
 import os
+from pygeocoder import Geocoder
+from config import gkey
 
 def eq_collection():
 
@@ -17,7 +19,7 @@ def eq_collection():
 
     browser.links.find_by_partial_text('All')[1].click()
 
-    time.sleep(5)
+    time.sleep(10)
 
     # read csv_file to pandas dataframe
     eq_file = "../Downloads/all_day.csv"
@@ -38,6 +40,12 @@ def eq_collection():
     # reset the index so that state will be pushed into the dataframe
     new_eq_df = new_eq_df.reset_index()
 
+    # Reverse Geocode latitudes and longitudes to get county where earthquakes occured
+    new_eq_df['county'] = new_eq_df.apply(lambda x: Geocoder(api_key=gkey).reverse_geocode(x['latitude'],x['longitude']).county,axis=1)
+
+    if new_eq_df.isna() is True:
+        new_eq_df.dropna()
+
     # make connection to database and connect the client
     conn = 'mongodb://localhost:27017'
     client = pymongo.MongoClient(conn)
@@ -50,12 +58,12 @@ def eq_collection():
 
     time.sleep(5)
 
-    if os.path.exists("all_day.csv"):
-        os.remove("all_day.csv")
+    if os.path.exists("../Downloads/all_day.csv"):
+        os.remove("../Downloads/all_day.csv")
     else:
         print("The file does not exist")
 
-schedule.every().day.at("10:13").do(eq_collection)
+schedule.every().day.at("23:59").do(eq_collection)
 
 while True:
     schedule.run_pending()
