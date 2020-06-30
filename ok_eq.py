@@ -9,16 +9,20 @@ from pygeocoder import Geocoder
 from config import gkey
 
 def eq_collection():
-
+    # let myself know the code is actually running
     print('code running!')
 
+    # define link and iniate browser from splinter
     url = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/csv.php'
     browser = Browser('chrome', headless=False)
-
+    
+    # go to website
     browser.visit(url)
 
+    # download file of interest, 24hr earth quake data
     browser.links.find_by_partial_text('All')[1].click()
 
+    # pause program for 10 seconds to allow file to download before reading the file
     time.sleep(10)
 
     # read csv_file to pandas dataframe
@@ -58,11 +62,13 @@ def eq_collection():
 
     time.sleep(5)
 
+    # remove csv file from computer when ETL is done to save memory on computer
     if os.path.exists("../Downloads/all_day.csv"):
         os.remove("../Downloads/all_day.csv")
     else:
         print("The file does not exist")
 
+# repeat this process everyday passively
 schedule.every().day.at("23:59").do(eq_collection)
 
 while True:
